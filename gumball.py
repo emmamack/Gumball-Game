@@ -32,7 +32,7 @@ def main():
         #get input: exit game
         for event in pg.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                break
+                return
 
         # clear sprites
         all_sprites.clear(screen,background)
