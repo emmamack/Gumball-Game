@@ -3,35 +3,54 @@ Authors: Emma Mack, Gabriella Bourdon
 """
 
 
-import pygame as pg
+import pygame
 from pygame.locals import *
 
+class Gumball:
+    def __init__(self, x, y, color):
+        self.x = x
+        self.y = y
+        self.color = color
+
+    def move_up_layer():
+        pass
+
+    def move_down_layer():
+        pass
+
+def play_gumball_animation():
+    pass
+
+def play_prize_animation():
+    pass
 
 def main():
-    pg.init()
+    pygame.init()
 
     # set screen
     screenrect = Rect(0,0, 1080,720)
-    screen = pg.display.set_mode(screenrect.size)
+    screen = pygame.display.set_mode(screenrect.size)
 
     # set background
-    background = pg.Surface(screenrect.size).convert()
+    background = pygame.Surface(screenrect.size).convert()
     background.fill((255, 0,0))
     screen.blit(background, (0,0))
-    pg.display.update()
+    pygame.display.update()
 
     # sprite stuff
-    all_sprites = pg.sprite.RenderUpdates()
+    all_sprites = pygame.sprite.RenderUpdates()
 
     # time stuff
-    clock = pg.time.Clock()
+    clock = pygame.time.Clock()
 
     # game loop
-    while 1:
+    while True:
 
         #get input: exit game
-        for event in pg.event.get():
+        for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                pygame.quit()
+                sys.exit()
                 return
 
         # clear sprites
@@ -42,7 +61,7 @@ def main():
 
         # redraw sprites
         dirty = all_sprites.draw(screen)
-        pg.display.update(dirty)
+        pygame.display.update(dirty)
 
         # maintain frame rate
         clock.tick(30)
