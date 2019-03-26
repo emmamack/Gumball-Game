@@ -30,6 +30,18 @@ class Quarter(Gumball):
         self.x = x
         self.y = y
 
+class Surprise(Quarter):
+    pass
+
+class Layers:
+    def __init__(self, *images):
+        self.imgs = []
+        for image in images:
+            self.imgs.append(image)
+
+    def insert(image, index):
+        pass
+
 def main():
     pygame.init()
     time = 0
@@ -43,7 +55,7 @@ def main():
 
     machine_l1 = pygame.image.load('gumball_layer_1.png')
     machine_l2 = pygame.image.load('gumball_layer_2.png')
-    layers = [machine_l1, machine_l2]
+    layers = Layers(machine_l1, machine_l2)
 
 
     # game loop
@@ -59,10 +71,10 @@ def main():
 
 
         if time == 100:
-            layers[0] = machine_l2
-            layers[1] = machine_l1
+            layers.imgs[0] = machine_l2
+            layers.imgs[1] = machine_l1
 
-        for image in layers:
+        for image in layers.imgs:
             screen.blit(image, (0,0))
 
 
