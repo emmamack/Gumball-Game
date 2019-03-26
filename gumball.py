@@ -6,6 +6,7 @@ Authors: Emma Mack, Gabriella Bourdon
 import pygame
 from pygame.locals import * # you can skip the modulename. portion and simply use functionname() just like Python's built in functions
 from sys import exit
+import animation
 
 BLACK = ( 0, 0, 0)
 WHITE = (255, 255, 255)
@@ -38,6 +39,17 @@ class Surprise(Quarter):
 #         if event.type == MOUSEBUTTONDOWN:
 #             print("Test")
 
+# def gumball_animation(time, t_start, layers):
+#     t_since = time - t_start
+#
+#     if  0 < t_since < 150:
+#         pass
+#
+#     return layers
+
+def surprise_animation():
+    pass
+
 class Layers:
     def __init__(self, *images):
         self.imgs = []
@@ -65,20 +77,23 @@ def main():
 
     # game loop
     done = False
+    gumball_animation_playing = False
+    surprise_animation_playing = False
     while not done:
 
         #get input: exit game
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 done = True
-            if event.type == MOUSEBUTTONDOWN: #clicking test
-                print("Test")
+            if event.type == MOUSEBUTTONDOWN: #TODO: change to specific clicking area
+                gumball_animation_playing = True
+                t_start = time
+                # layers.insert(Gumball, 2)
 
         screen.fill(BLACK)
 
-        if time == 100:
-            layers.imgs[0] = machine_l2 #layer test
-            layers.imgs[1] = machine_l1
+        if gumball_animation_playing:
+            layers = gumball_animation(time, t_start, layers)
 
         for image in layers.imgs:
             screen.blit(image, (0,0))
