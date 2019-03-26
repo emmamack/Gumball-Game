@@ -33,6 +33,11 @@ class Quarter(Gumball):
 class Surprise(Quarter):
     pass
 
+# class Mouse(object):
+#     for event in pygame.event.get():
+#         if event.type == MOUSEBUTTONDOWN:
+#             print("Test")
+
 class Layers:
     def __init__(self, *images):
         self.imgs = []
@@ -66,18 +71,17 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 done = True
+            if event.type == MOUSEBUTTONDOWN: #clicking test
+                print("Test")
 
         screen.fill(BLACK)
 
-
         if time == 100:
-            layers.imgs[0] = machine_l2
+            layers.imgs[0] = machine_l2 #layer test
             layers.imgs[1] = machine_l1
 
         for image in layers.imgs:
             screen.blit(image, (0,0))
-
-
 
         # maintain frame rate
         clock.tick(30)
