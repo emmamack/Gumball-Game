@@ -23,16 +23,11 @@ class Gumball:
         self.y = y
         self.color = color
 
-    def move_up_layer():
-        pass
-
-    def move_down_layer():
-        pass
-
-class Quarter(Gumball):
-    def __init__(self, x, y, color):
+class Quarter():
+    def __init__(self, image, x = 0, y = 0):
         self.x = x
         self.y = y
+        self.image = image
 
 class Surprise(Quarter):
     pass
@@ -73,7 +68,7 @@ def main():
     # time stuff
     clock = pygame.time.Clock()
 
-    #initialize layers (gumball machine images)
+    #initialize and resize gumball machine layers
     machine_l1 = pygame.image.load('gumball_layer_1.png')
     size1 = machine_l1.get_size()
     machine_l1 = pygame.transform.scale(machine_l1, (int(size1[0]*.8), int(size1[1]*.8)))
@@ -83,8 +78,11 @@ def main():
     machine_l3 = pygame.image.load('gumball_layer_3.png')
     size3 = machine_l3.get_size()
     machine_l3 = pygame.transform.scale(machine_l3, (int(size3[0]*.8), int(size3[1]*.8)))
-    print(machine_l3.get_size())
-    layers = [(machine_l1, 407, 70), (machine_l2, 372, 312), (machine_l3, 508, 370)]
+    machine_l4 = pygame.image.load('gumball_layer_4.png')
+    size4 = machine_l4.get_size()
+    machine_l4 = pygame.transform.scale(machine_l4, (int(size4[0]*.8), int(size4[1]*.8)))
+    layers = [(machine_l1, 407, 70), (machine_l2, 372, 312),
+                (machine_l3, 508, 370), (machine_l4, 523, 392)]
 
 
     # game loop
@@ -111,6 +109,8 @@ def main():
         for layer in layers:
             if isinstance(layer[0], pygame.Surface):
                 screen.blit(layer[0], (layer[1],layer[2]))
+            if isinstance(layer[0], Quarter):
+                screen.blit(layer[0].image, layer[0].x, layer[0].y)
             if isinstance(layer[0], Gumball):
                 pygame.draw.circle(screen, layer[0].color, (layer[0].x, layer[0].y), 10)
 
