@@ -7,15 +7,18 @@ import pygame
 from pygame.locals import * # you can skip the modulename. portion and simply use functionname() just like Python's built in functions
 from sys import exit
 import animation
+import random
 
 BLACK = ( 0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = ( 0, 255, 0)
 BLUE = ( 0, 0, 255)
+YELLOW = (255, 255, 0)
+colors = [RED, GREEN, BLUE, YELLOW]
 
 class Gumball:
-    def __init__(self, x, y, color):
+    def __init__(self, x = 0, y = 0, color = RED):
         self.x = x
         self.y = y
         self.color = color
@@ -52,12 +55,12 @@ def surprise_animation():
 
 class Layers:
     def __init__(self, *images):
-        self.imgs = []
+        self.layers = []
         for image in images:
-            self.imgs.append(image)
+            self.layers.append(image)
 
-    def insert(image, index):
-        pass
+    def insert(self, obj, index):
+        self.layers.insert(index, obj)
 
 def main():
     pygame.init()
@@ -70,9 +73,18 @@ def main():
     # time stuff
     clock = pygame.time.Clock()
 
+    #initialize layers (gumball machine images)
     machine_l1 = pygame.image.load('gumball_layer_1.png')
+    size1 = machine_l1.get_size()
+    machine_l1 = pygame.transform.scale(machine_l1, (int(size1[0]*.8), int(size1[1]*.8)))
     machine_l2 = pygame.image.load('gumball_layer_2.png')
-    layers = Layers(machine_l1, machine_l2)
+    size2 = machine_l2.get_size()
+    machine_l2 = pygame.transform.scale(machine_l2, (int(size2[0]*.8), int(size2[1]*.8)))
+    machine_l3 = pygame.image.load('gumball_layer_3.png')
+    size3 = machine_l3.get_size()
+    machine_l3 = pygame.transform.scale(machine_l3, (int(size3[0]*.8), int(size3[1]*.8)))
+    print(machine_l3.get_size())
+    layers = [(machine_l1, 407, 70), (machine_l2, 372, 312), (machine_l3, 508, 370)]
 
 
     # game loop
@@ -81,22 +93,26 @@ def main():
     surprise_animation_playing = False
     while not done:
 
-        #get input: exit game
+        #get input: exit game, check for click
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 done = True
             if event.type == MOUSEBUTTONDOWN: #TODO: change to specific clicking area
                 gumball_animation_playing = True
                 t_start = time
-                # layers.insert(Gumball, 2)
+                gumball = Gumball(color = random.choice(colors))
+                layers.insert(1, (gumball, 0, 0))
 
         screen.fill(BLACK)
 
-        if gumball_animation_playing:
-            layers = gumball_animation(time, t_start, layers)
+        # if gumball_animation_playing:
+        #     layers = gumball_animation(time, t_start, layers, gumball)
 
-        for image in layers.imgs:
-            screen.blit(image, (0,0))
+        for layer in layers:
+            if isinstance(layer[0], pygame.Surface):
+                screen.blit(layer[0], (layer[1],layer[2]))
+            if isinstance(layer[0], Gumball):
+                pygame.draw.circle(screen, layer[0].color, (layer[0].x, layer[0].y), 10)
 
         # maintain frame rate
         clock.tick(30)
