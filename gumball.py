@@ -38,6 +38,7 @@ class Machine_layer:
         size = self.image.get_size()
         self.image = pygame.transform.scale(self.image, (int(size[0]*amt), int(size[1]*amt)))
 
+#THIS ISN'T CURRENTLY BEING USED CAUSE IT MIGHT BE REDUNDANT
 class Layers:
     def __init__(self, *images):
         self.layers = []
@@ -47,6 +48,11 @@ class Layers:
     def insert(self, obj, index):
         self.layers.insert(index, obj)
 
+def get_index(layers, cl):
+    for ind in range(len(layers)):
+        if isinstance(layers[ind], cl):
+            return ind
+
 class Surprise(Quarter):
     pass
 
@@ -55,13 +61,15 @@ class Surprise(Quarter):
 #         if event.type == MOUSEBUTTONDOWN:
 #             print("Test")
 
-# def gumball_animation(time, t_start, layers):
-#     t_since = time - t_start
-# 
-#     if  0 < t_since < 150:
-#         pass
-#
-#     return layers
+def gumball_animation(time, t_start, layers):
+    t_since = time - t_start
+    gumball = layers[get_index(layers, Gumball)]
+
+    if  0 < t_since < 150:
+        gumball.x += 5
+        gumball.y += 5
+
+    return layers
 
 def surprise_animation():
     pass
@@ -85,20 +93,6 @@ def main():
     layers = [machine_l1, machine_l2, machine_l3, machine_l4]
     for layer in layers:
         layer.scale_img(.8)
-    # machine_l1 = pygame.image.load('gumball_layer_1.png')
-    # # size1 = machine_l1.get_size()
-    # # machine_l1 = pygame.transform.scale(machine_l1, (int(size1[0]*.8), int(size1[1]*.8)))
-    # # machine_l2 = pygame.image.load('gumball_layer_2.png')
-    # # size2 = machine_l2.get_size()
-    # # machine_l2 = pygame.transform.scale(machine_l2, (int(size2[0]*.8), int(size2[1]*.8)))
-    # # machine_l3 = pygame.image.load('gumball_layer_3.png')
-    # # size3 = machine_l3.get_size()
-    # # machine_l3 = pygame.transform.scale(machine_l3, (int(size3[0]*.8), int(size3[1]*.8)))
-    # # machine_l4 = pygame.image.load('gumball_layer_4.png')
-    # # size4 = machine_l4.get_size()
-    # # machine_l4 = pygame.transform.scale(machine_l4, (int(size4[0]*.8), int(size4[1]*.8)))
-    # # layers = [(machine_l1, 407, 70), (machine_l2, 372, 312),
-    # #             (machine_l3, 508, 370), (machine_l4, 523, 392)]
 
 
     # game loop
