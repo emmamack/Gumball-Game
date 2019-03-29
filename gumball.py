@@ -45,7 +45,7 @@ def get_index(layers, cl):
         if isinstance(layers[ind], cl):
             return ind
 
-class Surprise(Quarter):
+class Surprise(Machine_layer):
     pass
 
 def gumball_animation(time, t_start, layers):
@@ -87,9 +87,16 @@ def surprise_animation(time, t_start, layers):
     gumball_ind = get_index(layers, Gumball)
     gumball = layers[gumball_ind]
 
+    #TODO go up layer
+
     if 0 < t_since < 20:
         gumball.x += 15
         gumball.y -= 10
+
+    if t_since == 20:
+        surprise = Surprise('oompa_caitrin.jpg', 800, 525)
+        surprise.scale_img(.2)
+        layers.append(surprise)
 
     return layers, True
 
@@ -128,7 +135,6 @@ def main():
 
     while not done:
         mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()
-        print(mouse_pos_x, mouse_pos_y)
         #get input: exit game, check for click
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
