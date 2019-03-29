@@ -9,6 +9,7 @@ from sys import exit
 import animation
 import random
 
+
 BLACK = ( 0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -85,6 +86,12 @@ def main():
     # time stuff
     clock = pygame.time.Clock()
 
+    #import quarter image and set position
+    this_quarter = Quarter('quarter.png')
+    this_dark_quarter2 = Quarter('gumball_quarter_dark2.png')
+
+
+
     #initialize and resize gumball machine layers
     machine_l1 = Machine_layer('gumball_layer_1.png', 407, 70)
     machine_l2 = Machine_layer('gumball_layer_2.png', 373, 312)
@@ -99,8 +106,10 @@ def main():
     done = False
     gumball_animation_playing = False
     surprise_animation_playing = False
-    while not done:
 
+    while not done:
+        mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()
+        print(mouse_pos_x,mouse_pos_y)
         #get input: exit game, check for click
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -108,8 +117,10 @@ def main():
             if event.type == MOUSEBUTTONDOWN: #TODO: change to specific clicking area
                 gumball_animation_playing = True
                 t_start = time
+                mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()
                 gumball = Gumball(color = random.choice(colors))
                 layers.insert(1, gumball)
+
 
         screen.fill(BLACK)
 
@@ -121,6 +132,11 @@ def main():
                 screen.blit(layer.image, (layer.x,layer.y))
             if isinstance(layer, Gumball):
                 pygame.draw.circle(screen, layer.color, (layer.x, layer.y), 10)
+        if not gumball_animation_playing:
+            if int(mouse_pos_x) in range(527,588) and int(mouse_pos_y) in range(394,411):
+                screen.blit(this_dark_quarter2.image,(mouse_pos_x-15,mouse_pos_y-15))
+            else:
+                screen.blit(this_quarter.image,(mouse_pos_x-15,mouse_pos_y-15))
 
         # maintain frame rate
         clock.tick(30)
@@ -134,35 +150,3 @@ if __name__ == '__main__':
     pygame.display.quit()
     pygame.quit()
     exit()
-
-
-
-
-
-
-# set background
-# background = pygame.Surface(screenrect.size).convert()
-# background.fill(BLACK)
-# screen.blit(background, (0,0))
-# pygame.draw.ellipse(background, GREEN, (300, 250, 40, 80), 1)
-# pygame.display.update()
-
-
-# sprite stuff
-# all_sprites = pygame.sprite.RenderUpdates()
-
-
-
-
-
-# clear sprites
-# all_sprites.clear(screen,background)
-
-# update all_sprites
-# all_sprites.update()
-
-# redraw sprites
-# dirty = all_sprites.draw(screen)
-# pygame.display.update(dirty)
-
-# pygame.draw.ellipse(DISPLAYSURF, GREEN, (300, 250, 40, 80), 1)
