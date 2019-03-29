@@ -84,12 +84,17 @@ def gumball_animation(time, t_start, layers):
 
 def surprise_animation(time, t_start, layers):
     t_since = time - t_start
-    gumball_ind = get_index(layers, Gumball)
-    gumball = layers[gumball_ind]
 
     #TODO go up layer
+    if t_since == 0:
+        gumball_ind = get_index(layers, Gumball)
+        gumball = layers[gumball_ind]
+        layers.pop(gumball_ind)
+        layers.insert(gumball_ind + 1, gumball)
 
     if 0 < t_since < 20:
+        gumball_ind = get_index(layers, Gumball)
+        gumball = layers[gumball_ind]
         gumball.x += 15
         gumball.y -= 10
 
@@ -97,6 +102,11 @@ def surprise_animation(time, t_start, layers):
         surprise = Surprise('oompa_caitrin.jpg', 800, 525)
         surprise.scale_img(.2)
         layers.append(surprise)
+
+    if 20 < t_since < 40:
+        surprise_ind = get_index(layers, Surprise)
+        surprise = layers[surprise_ind]
+        surprise.scale_img(1.1)
 
     return layers, True
 
