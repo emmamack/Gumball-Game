@@ -6,8 +6,8 @@ Authors: Emma Mack, Gabriella Bourdon
 import pygame
 from pygame.locals import * # you can skip the modulename. portion and simply use functionname() just like Python's built in functions
 from sys import exit
-import animation
 import random
+import math
 
 
 BLACK = ( 0, 0, 0)
@@ -39,15 +39,6 @@ class Machine_layer:
         size = self.image.get_size()
         self.image = pygame.transform.scale(self.image, (int(size[0]*amt), int(size[1]*amt)))
 
-#THIS ISN'T CURRENTLY BEING USED CAUSE IT MIGHT BE REDUNDANT
-class Layers:
-    def __init__(self, *images):
-        self.layers = []
-        for image in images:
-            self.layers.append(image)
-
-    def insert(self, obj, index):
-        self.layers.insert(index, obj)
 
 def get_index(layers, cl):
     for ind in range(len(layers)):
@@ -57,23 +48,50 @@ def get_index(layers, cl):
 class Surprise(Quarter):
     pass
 
-# class Mouse(object):
-#     for event in pygame.event.get():
-#         if event.type == MOUSEBUTTONDOWN:
-#             print("Test")
-
 def gumball_animation(time, t_start, layers):
     t_since = time - t_start
-    gumball = layers[get_index(layers, Gumball)]
+    gumball_ind = get_index(layers, Gumball)
+    gumball = layers[gumball_ind]
 
-    if  0 < t_since < 150:
-        gumball.x += 5
-        gumball.y += 5
+    speed = 6
+    slope = 0.2087
+    width = 127
 
-    return layers
+    if t_since == 0:
+        gumball.x, gumball.y = 483, 473
+    if t_since == int(5.1*width/speed):
+        return layers, False, True
 
-def surprise_animation():
-    pass
+    if t_since == int(width/speed) or t_since == int(3*width/speed):
+        layers.pop(gumball_ind)
+        layers.insert(gumball_ind + 1, gumball)
+    if t_since == int(2*width/speed) or t_since == int(4*width/speed):
+        layers.pop(gumball_ind)
+        layers.insert(gumball_ind - 1, gumball)
+
+    if  (0 < t_since < int(width/speed) or int(2*width/speed) < t_since < int(3*width/speed)
+                or int(4*width/speed) < t_since < int(4.4*width/speed)):
+        gumball.x += speed
+        gumball.y += math.ceil(speed*slope)
+    if (int(width/speed) < t_since < int(2*width/speed)
+                or int(3*width/speed) < t_since < int(4*width/speed)):
+        gumball.x -= speed
+        gumball.y += math.ceil(speed*slope)
+    if int(4.4*width/speed) < t_since < int(5.1*width/speed):
+        gumball.y += speed
+
+    return layers, True, False
+
+def surprise_animation(time, t_start, layers):
+    t_since = time - t_start
+    gumball_ind = get_index(layers, Gumball)
+    gumball = layers[gumball_ind]
+
+    if 0 < t_since < 20:
+        gumball.x += 15
+        gumball.y -= 10
+
+    return layers, True
 
 def main():
     pygame.init()
@@ -106,32 +124,39 @@ def main():
     done = False
     gumball_animation_playing = False
     surprise_animation_playing = False
+    g_played = False
 
     while not done:
         mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()
-        print(mouse_pos_x,mouse_pos_y)
+        print(mouse_pos_x, mouse_pos_y)
         #get input: exit game, check for click
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 done = True
-            if event.type == MOUSEBUTTONDOWN: #TODO: change to specific clicking area
+            if event.type == MOUSEBUTTONDOWN and not g_played: #TODO: change to specific clicking area
                 gumball_animation_playing = True
                 t_start = time
-                mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()
                 gumball = Gumball(color = random.choice(colors))
                 layers.insert(1, gumball)
+            if event.type == MOUSEBUTTONDOWN and g_played:
+                surprise_animation_playing = True
+                t_start = time
 
 
         screen.fill(BLACK)
 
         if gumball_animation_playing:
-            layers = gumball_animation(time, t_start, layers)
+            layers, gumball_animation_playing, g_played = gumball_animation(time, t_start, layers)
+
+        if surprise_animation_playing:
+            layers, surprise_animation_playing = surprise_animation(time, t_start, layers)
 
         for layer in layers:
             if isinstance(layer, Machine_layer) or isinstance(layer, Quarter):
                 screen.blit(layer.image, (layer.x,layer.y))
             if isinstance(layer, Gumball):
                 pygame.draw.circle(screen, layer.color, (layer.x, layer.y), 10)
+
         if not gumball_animation_playing:
             if int(mouse_pos_x) in range(527,588) and int(mouse_pos_y) in range(394,411):
                 screen.blit(this_dark_quarter2.image,(mouse_pos_x-15,mouse_pos_y-15))
