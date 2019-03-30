@@ -32,16 +32,23 @@ class Quarter():
 
 class Machine_layer:
     def __init__(self, image_name, x = 0, y = 0):
+        self.orig_image = pygame.image.load(image_name)
+        self.orig_size = self.orig_image.get_size()
         self.image = pygame.image.load(image_name)
+        self.current_scale = 1
         self.x = x
         self.y = y
     def scale(self, amt, centered = False):
-        size = self.image.get_size()
-        self.image = pygame.transform.scale(self.image, (int(size[0]*amt), int(size[1]*amt)))
+        scale_amt = self.current_scale*amt
+        self.image = pygame.transform.scale(
+            self.orig_image, (int(self.orig_size[0]*scale_amt), int(self.orig_size[1]*scale_amt)))
 
         if centered:
-            self.x -= size[0]*(amt - 1)/2
-            self.y -= size[1]*(amt - 1)/2
+            current_size = self.image.get_size()
+            self.x -= current_size[0]*(amt - 1)/2
+            self.y -= current_size[1]*(amt - 1)/2
+
+        self.current_scale = self.current_scale*amt
 
 
 def get_index(layers, cl):
@@ -89,7 +96,6 @@ def gumball_animation(time, t_start, layers):
 def surprise_animation(time, t_start, layers):
     t_since = time - t_start
 
-    #TODO go up layer
     if t_since == 0:
         gumball_ind = get_index(layers, Gumball)
         gumball = layers[gumball_ind]
@@ -103,6 +109,8 @@ def surprise_animation(time, t_start, layers):
         gumball.y -= 10
 
     if t_since == 20:
+        if isinstance(layers[-1], Surprise):
+            del layers[-1]
         surprise = Surprise('oompa_caitrin.jpg', 800, 525)
         surprise.scale(.05)
         layers.append(surprise)
@@ -111,6 +119,9 @@ def surprise_animation(time, t_start, layers):
         surprise_ind = get_index(layers, Surprise)
         surprise = layers[surprise_ind]
         surprise.scale(1.1, centered = True)
+
+    if t_since == 40:
+        return layers, False, False
 
     return layers, True, True
 
@@ -143,8 +154,8 @@ def main():
 
     # game loop
     done = False
-    gumball_animation_playing = False
-    surprise_animation_playing = False
+    g_playing = False
+    s_playing = False
     g_played = False
 
     while not done:
@@ -153,23 +164,23 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 done = True
-            if event.type == MOUSEBUTTONDOWN and not g_played: #TODO: change to specific clicking area
-                gumball_animation_playing = True
+            if event.type == MOUSEBUTTONDOWN and not (g_played or g_playing or s_playing): #TODO: change to specific clicking area
+                g_playing = True
                 t_start = time
                 gumball = Gumball(color = random.choice(colors))
                 layers.insert(1, gumball)
-            if event.type == MOUSEBUTTONDOWN and g_played:
-                surprise_animation_playing = True
+            if event.type == MOUSEBUTTONDOWN and g_played and not (g_playing or s_playing):
+                s_playing = True
                 t_start = time
 
 
         screen.fill(BLACK)
 
-        if gumball_animation_playing:
-            layers, gumball_animation_playing, g_played = gumball_animation(time, t_start, layers)
+        if g_playing:
+            layers, g_playing, g_played = gumball_animation(time, t_start, layers)
 
-        if surprise_animation_playing:
-            layers, surprise_animation_playing, g_played = surprise_animation(time, t_start, layers)
+        if s_playing:
+            layers, s_playing, g_played = surprise_animation(time, t_start, layers)
 
         for layer in layers:
             if isinstance(layer, Machine_layer) or isinstance(layer, Quarter):
@@ -177,7 +188,7 @@ def main():
             if isinstance(layer, Gumball):
                 pygame.draw.circle(screen, layer.color, (layer.x, layer.y), 10)
 
-        if not gumball_animation_playing and not g_played:
+        if not g_playing and not g_played:
             if int(mouse_pos_x) in range(527,588) and int(mouse_pos_y) in range(394,411):
                 screen.blit(this_dark_quarter2.image,(mouse_pos_x-15,mouse_pos_y-15))
             else:
@@ -186,6 +197,10 @@ def main():
         # maintain frame rate
         clock.tick(30)
         time += 1
+
+        print("s playing " + str(s_playing))
+        print("g playing " + str(g_playing))
+        print("g played" + str(g_played))
 
         pygame.display.update()
 
