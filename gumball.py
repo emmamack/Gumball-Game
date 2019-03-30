@@ -35,9 +35,13 @@ class Machine_layer:
         self.image = pygame.image.load(image_name)
         self.x = x
         self.y = y
-    def scale_img(self, amt):
+    def scale(self, amt, centered = False):
         size = self.image.get_size()
         self.image = pygame.transform.scale(self.image, (int(size[0]*amt), int(size[1]*amt)))
+
+        if centered:
+            self.x -= size[0]*(amt - 1)/2
+            self.y -= size[1]*(amt - 1)/2
 
 
 def get_index(layers, cl):
@@ -100,15 +104,15 @@ def surprise_animation(time, t_start, layers):
 
     if t_since == 20:
         surprise = Surprise('oompa_caitrin.jpg', 800, 525)
-        surprise.scale_img(.2)
+        surprise.scale(.05)
         layers.append(surprise)
 
     if 20 < t_since < 40:
         surprise_ind = get_index(layers, Surprise)
         surprise = layers[surprise_ind]
-        surprise.scale_img(1.1)
+        surprise.scale(1.1, centered = True)
 
-    return layers, True
+    return layers, True, True
 
 def main():
     pygame.init()
@@ -134,7 +138,7 @@ def main():
     machine_l4 = Machine_layer('gumball_layer_4.png', 523, 392)
     layers = [machine_l1, machine_l2, machine_l3, machine_l4]
     for layer in layers:
-        layer.scale_img(.8)
+        layer.scale(.8)
 
 
     # game loop
@@ -165,7 +169,7 @@ def main():
             layers, gumball_animation_playing, g_played = gumball_animation(time, t_start, layers)
 
         if surprise_animation_playing:
-            layers, surprise_animation_playing = surprise_animation(time, t_start, layers)
+            layers, surprise_animation_playing, g_played = surprise_animation(time, t_start, layers)
 
         for layer in layers:
             if isinstance(layer, Machine_layer) or isinstance(layer, Quarter):
@@ -173,7 +177,7 @@ def main():
             if isinstance(layer, Gumball):
                 pygame.draw.circle(screen, layer.color, (layer.x, layer.y), 10)
 
-        if not gumball_animation_playing:
+        if not gumball_animation_playing and not g_played:
             if int(mouse_pos_x) in range(527,588) and int(mouse_pos_y) in range(394,411):
                 screen.blit(this_dark_quarter2.image,(mouse_pos_x-15,mouse_pos_y-15))
             else:
