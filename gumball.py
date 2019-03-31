@@ -116,7 +116,8 @@ def surprise_animation(time, t_start, layers ,dirx, diry):
         gumball.y -= diry
 
     if t_since == 20:
-        surprise = Surprise('oompa_caitrin.jpg', gumball.x, gumball.y)
+        img_name = random.choice(['oompa_caitrin.jpg', 'giraffe.png'])
+        surprise = Surprise(img_name, gumball.x, gumball.y)
         surprise.scale(.05)
         layers.append(surprise)
 
