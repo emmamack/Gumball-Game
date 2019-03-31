@@ -51,10 +51,14 @@ class Machine_layer:
         self.current_scale = self.current_scale*amt
 
 
-def get_index(layers, cl):
+def get_index(layers, cl, last = False):
+    indices = []
     for ind in range(len(layers)):
         if isinstance(layers[ind], cl):
-            return ind
+            if not last:
+                return ind
+            indices.append(ind)
+    return indices[-1]
 
 class Surprise(Machine_layer):
     pass
@@ -93,30 +97,31 @@ def gumball_animation(time, t_start, layers):
 
     return layers, True, False
 
-def surprise_animation(time, t_start, layers):
+def get_dir():
+    xs = list(range(-30, -3)) + list(range(3, 30))
+    ys = list(range(-15, 30))
+    return random.choice(xs), random.choice(ys)
+
+def surprise_animation(time, t_start, layers ,dirx, diry):
     t_since = time - t_start
+    gumball_ind = get_index(layers, Gumball)
+    gumball = layers[gumball_ind]
 
     if t_since == 0:
-        gumball_ind = get_index(layers, Gumball)
-        gumball = layers[gumball_ind]
         layers.pop(gumball_ind)
         layers.insert(gumball_ind + 1, gumball)
 
     if 0 < t_since < 20:
-        gumball_ind = get_index(layers, Gumball)
-        gumball = layers[gumball_ind]
-        gumball.x += 15
-        gumball.y -= 10
+        gumball.x += dirx
+        gumball.y -= diry
 
     if t_since == 20:
-        if isinstance(layers[-1], Surprise):
-            del layers[-1]
-        surprise = Surprise('oompa_caitrin.jpg', 800, 525)
+        surprise = Surprise('oompa_caitrin.jpg', gumball.x, gumball.y)
         surprise.scale(.05)
         layers.append(surprise)
 
     if 20 < t_since < 40:
-        surprise_ind = get_index(layers, Surprise)
+        surprise_ind = get_index(layers, Surprise, last = True)
         surprise = layers[surprise_ind]
         surprise.scale(1.1, centered = True)
 
@@ -170,6 +175,7 @@ def main():
                 gumball = Gumball(color = random.choice(colors))
                 layers.insert(1, gumball)
             if event.type == MOUSEBUTTONDOWN and g_played and not (g_playing or s_playing):
+                dirx, diry = get_dir()
                 s_playing = True
                 t_start = time
 
@@ -180,7 +186,7 @@ def main():
             layers, g_playing, g_played = gumball_animation(time, t_start, layers)
 
         if s_playing:
-            layers, s_playing, g_played = surprise_animation(time, t_start, layers)
+            layers, s_playing, g_played = surprise_animation(time, t_start, layers, dirx, diry)
 
         for layer in layers:
             if isinstance(layer, Machine_layer) or isinstance(layer, Quarter):
@@ -189,7 +195,7 @@ def main():
                 pygame.draw.circle(screen, layer.color, (layer.x, layer.y), 10)
 
         if not g_playing and not g_played:
-            if int(mouse_pos_x) in range(527,588) and int(mouse_pos_y) in range(394,411):
+            if int(mouse_pos_x) in range(500,595) and int(mouse_pos_y) in range(335,445):
                 screen.blit(this_dark_quarter2.image,(mouse_pos_x-15,mouse_pos_y-15))
             else:
                 screen.blit(this_quarter.image,(mouse_pos_x-15,mouse_pos_y-15))
@@ -197,10 +203,6 @@ def main():
         # maintain frame rate
         clock.tick(30)
         time += 1
-
-        print("s playing " + str(s_playing))
-        print("g playing " + str(g_playing))
-        print("g played" + str(g_played))
 
         pygame.display.update()
 
