@@ -66,10 +66,38 @@ class Machine_layer:
         #update current scale to reflect change
         self.current_scale = self.current_scale*amt
 
-class Surprise(Machine_layer):
-    """Represents a surprise. Is its own object for code clarity.
+class Surprise():
+    """Represents a surprise. Has same methods as Machine_layer but cannot be "child"
+    of Machine_layer becuase this introduces bugs.
     """
-    pass
+    def __init__(self, image_name, x = 0, y = 0):
+        self.image = pygame.image.load(image_name)
+        self.x = x
+        self.y = y
+
+        #for use in self.scale
+        self.orig_image = pygame.image.load(image_name)
+        self.orig_size = self.orig_image.get_size()
+        self.current_scale = 1
+
+    def scale(self, amt, centered = False):
+        """Scales image by amt. References original image so as not to lose image quality.
+
+        amt: float amount to increase current (not original) size. 1 is no change
+        centered: if True, shifts x and y coordinates of object to keep it centered
+        on current point
+        """
+        scale_amt = self.current_scale*amt
+        self.image = pygame.transform.scale(
+            self.orig_image, (int(self.orig_size[0]*scale_amt), int(self.orig_size[1]*scale_amt)))
+
+        if centered:
+            current_size = self.image.get_size()
+            self.x -= current_size[0]*(amt - 1)/2
+            self.y -= current_size[1]*(amt - 1)/2
+
+        #update current scale to reflect change
+        self.current_scale = self.current_scale*amt
 
 
 
@@ -112,11 +140,10 @@ def gumball_animation(time, t_start, layers):
 
     #first timestep: rotate dispenser 90 degrees
     if t_since == 0:
-        angle = 90
         disp_ind = get_index(layers, Machine_layer, last = True)
         dispenser = layers[disp_ind]
-        dispense = pygame.transform.rotate(dispenser.image, angle)
-        dispenser.image = dispense
+        rotated_dispenser = pygame.transform.rotate(dispenser.image, 90)
+        dispenser.image = rotated_dispenser
         dispenser.x  = 537
         dispenser.y = 380
 
@@ -158,7 +185,7 @@ def get_dir():
     in one clock cycle. Helper function for surprise_animation
     """
     xs = list(range(-30, -3)) + list(range(3, 30))
-    ys = list(range(-15, 30))
+    ys = list(range(-30, 10))
     return random.choice(xs), random.choice(ys)
 
 def surprise_animation(time, t_start, layers, dirx, diry):
@@ -188,7 +215,7 @@ def surprise_animation(time, t_start, layers, dirx, diry):
     #move gumball in specified direction
     if 0 < t_since < 20:
         gumball.x += dirx
-        gumball.y -= diry
+        gumball.y += diry
 
     #insert surprise into layers
     if t_since == 20:
@@ -205,6 +232,12 @@ def surprise_animation(time, t_start, layers, dirx, diry):
 
     #last timestep: change flags
     if t_since == 40:
+        disp_ind = get_index(layers, Machine_layer, last = True)
+        dispenser = layers[disp_ind]
+        rotated_dispenser = pygame.transform.rotate(dispenser.image, 90)
+        dispenser.image = rotated_dispenser
+        dispenser.x  = 523
+        dispenser.y = 392
         return layers, False, False
 
     return layers, True, True
@@ -268,7 +301,7 @@ def main():
 
             #check for surprise animation click
             if event.type == MOUSEBUTTONDOWN and g_played and not (g_playing or s_playing):
-                if int(mouse_pos_x) in range (510,553) and int(mouse_pos_y) in range(700,730):
+                if int(mouse_pos_x) in range (510,553) and int(mouse_pos_y) in range(700,750):
                     dirx, diry = get_dir()
                     s_playing = True
                     t_start = time
@@ -286,7 +319,7 @@ def main():
 
         #draw all layers onto the screen
         for layer in layers:
-            if isinstance(layer, Machine_layer) or isinstance(layer, Quarter):
+            if isinstance(layer, Machine_layer) or isinstance(layer, Quarter) or isinstance(layer, Surprise):
                 screen.blit(layer.image, (layer.x,layer.y))
             if isinstance(layer, Gumball):
                 pygame.draw.circle(screen, layer.color, (layer.x, layer.y), 10)
