@@ -223,6 +223,8 @@ def surprise_animation(time, t_start, layers, dirx, diry):
         surprise = Surprise(img_name, gumball.x, gumball.y)
         surprise.scale(.05)
         layers.append(surprise)
+        pygame.mixer.music.load('ding.mp3')
+        pygame.mixer.music.play(0)
 
     #scale surprise a small amount each timestep
     if 20 < t_since < 40:
