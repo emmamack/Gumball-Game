@@ -9,7 +9,7 @@ from sys import exit
 import random
 import math
 
-
+#global variables -- colors
 BLACK = ( 0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -18,27 +18,42 @@ BLUE = ( 0, 0, 255)
 YELLOW = (255, 255, 0)
 colors = [RED, GREEN, BLUE, YELLOW]
 
+class Quarter():
+    """Represents a quarter."""
+    def __init__(self, image_name, x = 0, y = 0):
+        self.x = x
+        self.y = y
+        self.image = pygame.image.load(image_name)
+
 class Gumball:
+    """Represents a gumball. Has no image because  it is drawn as a circle."""
     def __init__(self, x = 0, y = 0, color = RED):
         self.x = x
         self.y = y
         self.color = color
 
-class Quarter():
+class Machine_layer:
+    """Represents a singular layer of the drawing of the machine. Multiple layers
+    are necessary so the gumball can weave in front of and behind the pole, and
+    the knob can independently rotate.
+    """
     def __init__(self, image_name, x = 0, y = 0):
+        self.image = pygame.image.load(image_name)
         self.x = x
         self.y = y
-        self.image = pygame.image.load(image_name)
 
-class Machine_layer:
-    def __init__(self, image_name, x = 0, y = 0):
+        #for use in self.scale
         self.orig_image = pygame.image.load(image_name)
         self.orig_size = self.orig_image.get_size()
-        self.image = pygame.image.load(image_name)
         self.current_scale = 1
-        self.x = x
-        self.y = y
+
     def scale(self, amt, centered = False):
+        """Scales image by amt. References original image so as not to lose image quality.
+
+        amt: float amount to increase current (not original) size. 1 is no change
+        centered: if True, shifts x and y coordinates of object to keep it centered
+        on current point
+        """
         scale_amt = self.current_scale*amt
         self.image = pygame.transform.scale(
             self.orig_image, (int(self.orig_size[0]*scale_amt), int(self.orig_size[1]*scale_amt)))
@@ -48,32 +63,54 @@ class Machine_layer:
             self.x -= current_size[0]*(amt - 1)/2
             self.y -= current_size[1]*(amt - 1)/2
 
+        #update current scale to reflect change
         self.current_scale = self.current_scale*amt
 
+class Surprise(Machine_layer):
+    """Represents a surprise. Is its own object for code clarity.
+    """
+    pass
 
-def get_index(layers, cl, last = False):
+
+
+def get_index(list, cl, last = False):
+    """Returns index of first object in a list that is an instance of given class.
+
+    list: list that contains at least one instance of desired class. If no instance
+    of class, raises an error.
+    cl: name of desired class
+    last: if True, returns last index of class instance instead of first
+    """
     indices = []
-    for ind in range(len(layers)):
-        if isinstance(layers[ind], cl):
+    for ind in range(len(list)):
+        if isinstance(list[ind], cl):
+            #exit loop and return first index if not finding last index
             if not last:
                 return ind
             indices.append(ind)
     return indices[-1]
 
-class Surprise(Machine_layer):
-    pass
-
 def gumball_animation(time, t_start, layers):
+    """Animates a gumball travelling down gumball machine track. Each time function
+    is called, it alters objects in layers to one clock-tick's worth of animation.
+
+    time: current game time
+    t_start: start time of gumball animation. Used to determine which step to animate.
+    layers: list of objects that contains at least all four machine layers and
+    one gumball.
+
+    Returns: altered list of objects and boolean values for flags
+    """
     t_since = time - t_start
+    #find gumball within layers
     gumball_ind = get_index(layers, Gumball)
     gumball = layers[gumball_ind]
 
+    speed = 6   #gumball speed
+    slope = 0.2087  #slope of ramp
+    width = 127     #width of chute
 
-    speed = 6
-    slope = 0.2087
-    width = 127
-
-    #knob!
+    #first timestep: rotate dispenser 90 degrees
     if t_since == 0:
         angle = 90
         disp_ind = get_index(layers, Machine_layer, last = True)
@@ -85,9 +122,7 @@ def gumball_animation(time, t_start, layers):
 
         gumball.x, gumball.y = 483, 473
 
-    if t_since == int(5.1*width/speed):
-        return layers, False, True
-
+    #change gumball layer position at specific time steps
     if t_since == int(width/speed) or t_since == int(3*width/speed):
         layers.pop(gumball_ind)
         layers.insert(gumball_ind + 1, gumball)
@@ -95,56 +130,91 @@ def gumball_animation(time, t_start, layers):
         layers.pop(gumball_ind)
         layers.insert(gumball_ind - 1, gumball)
 
+    #move gumball down and to the right in certain time intervals
     if  (0 < t_since < int(width/speed) or int(2*width/speed) < t_since < int(3*width/speed)
                 or int(4*width/speed) < t_since < int(4.4*width/speed)):
         gumball.x += speed
         gumball.y += math.ceil(speed*slope)
+
+    #move gumball down and to the left in certain time intervals
     if (int(width/speed) < t_since < int(2*width/speed)
                 or int(3*width/speed) < t_since < int(4*width/speed)):
         gumball.x -= speed
         gumball.y += math.ceil(speed*slope)
+
+    #move gumball down in last time interval
     if int(4.4*width/speed) < t_since < int(5.1*width/speed):
         gumball.y += speed
+
+    #last timestep: change flags to reflect completion of animation
+    if t_since == int(5.1*width/speed):
+        return layers, False, True
 
     return layers, True, False
 
 
 def get_dir():
+    """Returns random integers which represent an x amount and a y amount to travel
+    in one clock cycle. Helper function for surprise_animation
+    """
     xs = list(range(-30, -3)) + list(range(3, 30))
     ys = list(range(-15, 30))
     return random.choice(xs), random.choice(ys)
 
-def surprise_animation(time, t_start, layers ,dirx, diry):
+def surprise_animation(time, t_start, layers, dirx, diry):
+    """Animates gumball travelling to random spot, adds surprise to layers, and
+    plays scaling animation for surprise. Each time function is called, it alters
+    objects in layers to one clock-tick's worth of animation.
+
+    time: current game time
+    t_start: start time of gumball animation. Used to determine which step to animate.
+    layers: list of objects that contains at least all four machine layers and
+    one gumball.
+    dirx: integer amount of pixels to move gumball in x direction each timestep
+    diry: integer amount of pixels to move gumball in y direction each timestep
+
+    Returns: altered list of objects and boolean values for flags
+    """
     t_since = time - t_start
+    #find gumball within layers
     gumball_ind = get_index(layers, Gumball)
     gumball = layers[gumball_ind]
 
+    #change gumabll layer in first time step
     if t_since == 0:
         layers.pop(gumball_ind)
         layers.insert(gumball_ind + 1, gumball)
 
+    #move gumball in specified direction
     if 0 < t_since < 20:
         gumball.x += dirx
         gumball.y -= diry
 
+    #insert surprise into layers
     if t_since == 20:
-        img_name = random.choice(['oompa_caitrin.jpg', 'giraffe.png'])
+        img_name = random.choice(['cat.png', 'giraffe.png', 'hippo.png', 'turtle.png'])
         surprise = Surprise(img_name, gumball.x, gumball.y)
         surprise.scale(.05)
         layers.append(surprise)
 
+    #scale surprise a small amount each timestep
     if 20 < t_since < 40:
         surprise_ind = get_index(layers, Surprise, last = True)
         surprise = layers[surprise_ind]
         surprise.scale(1.1, centered = True)
 
+    #last timestep: change flags
     if t_since == 40:
         return layers, False, False
 
     return layers, True, True
 
 
+
 def main():
+    """Main game setup and game loop.
+    """
+
     pygame.init()
     time = 0
     angle = 0
@@ -153,7 +223,7 @@ def main():
     screen = pygame.display.set_mode((1080, 980))
     pygame.display.set_caption("Gumball Surprise")
 
-    # time stuff
+    # iniialize clock
     clock = pygame.time.Clock()
 
     #import quarter image and set position
@@ -176,13 +246,19 @@ def main():
     s_playing = False
     g_played = False
 
-
+    #main game loop
     while not done:
+
         mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()
-        #get input: exit game, check for click
+
+        #get input
         for event in pygame.event.get():
+
+            #check for quit
             if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 done = True
+
+            #check for gumball animation click
             if event.type == MOUSEBUTTONDOWN and not (g_played or g_playing or s_playing):
                 if int(mouse_pos_x) in range(500,595) and int(mouse_pos_y) in range(335,445):#specific clicking area of dispenser
                     g_playing = True
@@ -190,27 +266,32 @@ def main():
                     gumball = Gumball(color = random.choice(colors))
                     layers.insert(1, gumball)
 
+            #check for surprise animation click
             if event.type == MOUSEBUTTONDOWN and g_played and not (g_playing or s_playing):
-                dirx, diry = get_dir()
                 if int(mouse_pos_x) in range (510,553) and int(mouse_pos_y) in range(700,730):
+                    dirx, diry = get_dir()
                     s_playing = True
                     t_start = time
 
+        #reinitialize background
         screen.fill(BLACK)
 
-
+        #play timestep of gumball animation if flags correspond
         if g_playing:
             layers, g_playing, g_played = gumball_animation(time, t_start, layers)
+
+        #play timestep of surprise animation if flags correspond
         if s_playing:
             layers, s_playing, g_played = surprise_animation(time, t_start, layers, dirx, diry)
 
+        #draw all layers onto the screen
         for layer in layers:
-
             if isinstance(layer, Machine_layer) or isinstance(layer, Quarter):
                 screen.blit(layer.image, (layer.x,layer.y))
             if isinstance(layer, Gumball):
                 pygame.draw.circle(screen, layer.color, (layer.x, layer.y), 10)
 
+        #make quarter follow mouse if flags correspond
         if not g_playing and not g_played:
             if int(mouse_pos_x) in range(500,595) and int(mouse_pos_y) in range(335,445):
                 screen.blit(this_dark_quarter2.image,(mouse_pos_x-15,mouse_pos_y-15))
@@ -226,6 +307,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+    #exit game if main game loop ends
     pygame.display.quit()
     pygame.quit()
     exit()
