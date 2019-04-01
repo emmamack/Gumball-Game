@@ -1,4 +1,4 @@
-"""Gumball animation game stuff.
+"""Gumball animation game.
 Authors: Emma Mack, Gabriella Bourdon
 """
 
@@ -261,7 +261,7 @@ def main():
 
     #import quarter image and set position
     this_quarter = Quarter('quarter.png')
-    this_dark_quarter2 = Quarter('gumball_quarter_dark2.png')
+    this_dark_quarter = Quarter('gumball_quarter_dark.png')
 
     #initialize and resize gumball machine layers
     machine_l1 = Machine_layer('gumball_layer_1.png', 407, 70)
@@ -327,7 +327,7 @@ def main():
         #make quarter follow mouse if flags correspond
         if not g_playing and not g_played:
             if int(mouse_pos_x) in range(500,595) and int(mouse_pos_y) in range(335,445):
-                screen.blit(this_dark_quarter2.image,(mouse_pos_x-15,mouse_pos_y-15))
+                screen.blit(this_dark_quarter.image,(mouse_pos_x-15,mouse_pos_y-15))
             else:
                 screen.blit(this_quarter.image,(mouse_pos_x-15,mouse_pos_y-15))
 
