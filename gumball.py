@@ -143,32 +143,6 @@ def surprise_animation(time, t_start, layers ,dirx, diry):
 
     return layers, True, True
 
-def dispenser_animation(time, t_start, layers):
-    # t_since = time - t_start
-    # if 0 < t_since < 20:
-    # degree = 0
-    # for d in range(90):
-        # dispense = pygame.transform.rotate(knob.image,90)
-
-    # angle %=360
-
-    # dispense = pygame.transform.rotate(knob.image, angle)
-    # # screen.blit(dispense, (547,400))
-    # screen.blit(dispense, (680,440))
-
-    # move knob across- timing is right
-        # screen.blit(knob.image,(knob.x,knob.y))
-        # knob.x += 1
-
-    # angle = 90
-    # disp_ind = get_index(layers, Machine_layer, last = True)
-    # dispenser = layers[disp_ind]
-    # dispense = pygame.transform.rotate(dispenser.image, angle)
-    # dispenser.image = dispense
-    # return layers
-    pass
-
-
 
 def main():
     pygame.init()
@@ -196,7 +170,7 @@ def main():
         layer.scale(.8)
 
 
-    # game loop
+    # game loop flags
     done = False
     g_playing = False
     s_playing = False
@@ -205,28 +179,28 @@ def main():
 
     while not done:
         mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()
-        print (mouse_pos_x,mouse_pos_y)
         #get input: exit game, check for click
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 done = True
-            if event.type == MOUSEBUTTONDOWN and not (g_played or g_playing or s_playing): #TODO: change to specific clicking area
-                g_playing = True
-                t_start = time
-                gumball = Gumball(color = random.choice(colors))
-                layers.insert(1, gumball)
+            if event.type == MOUSEBUTTONDOWN and not (g_played or g_playing or s_playing):
+                if int(mouse_pos_x) in range(500,595) and int(mouse_pos_y) in range(335,445):#specific clicking area of dispenser
+                    g_playing = True
+                    t_start = time
+                    gumball = Gumball(color = random.choice(colors))
+                    layers.insert(1, gumball)
 
             if event.type == MOUSEBUTTONDOWN and g_played and not (g_playing or s_playing):
                 dirx, diry = get_dir()
-                s_playing = True
-                t_start = time
+                if int(mouse_pos_x) in range (510,553) and int(mouse_pos_y) in range(700,730):
+                    s_playing = True
+                    t_start = time
 
         screen.fill(BLACK)
 
 
         if g_playing:
             layers, g_playing, g_played = gumball_animation(time, t_start, layers)
-            # layers, g_playing, g_played = gumball_animation(time, t_start, layers)
         if s_playing:
             layers, s_playing, g_played = surprise_animation(time, t_start, layers, dirx, diry)
 
