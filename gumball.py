@@ -192,8 +192,8 @@ def get_dir():
     """Returns random integers which represent an x amount and a y amount to travel
     in one clock cycle. Helper function for surprise_animation
     """
-    xs = list(range(-30, -3)) + list(range(3, 30))
-    ys = list(range(-30, 10))
+    xs = list(range(-25, -3)) + list(range(3, 30))
+    ys = list(range(-25, 10))
     return random.choice(xs), random.choice(ys)
 
 def surprise_animation(time, t_start, layers, dirx, diry):
@@ -227,7 +227,9 @@ def surprise_animation(time, t_start, layers, dirx, diry):
 
     #insert surprise into layers
     if t_since == 20:
-        img_name = random.choice(['cat.png', 'giraffe.png', 'hippo.png', 'turtle.png', 'iguana.png', 'pelican.png'])
+        img_name = random.choice(['cat.png', 'giraffe.png', 'hippo.png', 'turtle.png',
+                                'iguana.png', 'pelican.png', 'dog.png', 'fish.png',
+                                'penguin.png', 'snake.png'])
         surprise = Surprise(img_name, gumball.x, gumball.y)
         surprise.scale(.05)
         layers.append(surprise)
