@@ -68,7 +68,7 @@ class Machine_layer:
 
 class Surprise():
     """Represents a surprise. Has same methods as Machine_layer but cannot be "child"
-    of Machine_layer becuase this introduces bugs.
+    of Machine_layer because this introduces bugs.
     """
     def __init__(self, image_name, x = 0, y = 0):
         self.image = pygame.image.load(image_name)
@@ -104,10 +104,13 @@ class Surprise():
 def get_index(list, cl, last = False):
     """Returns index of first object in a list that is an instance of given class.
 
-    list: list that contains at least one instance of desired class. If no instance
-    of class, raises an error.
+    list: list that contains at least one instance of desired class. If there is no instance
+    of class, it raises an error.
     cl: name of desired class
     last: if True, returns last index of class instance instead of first
+    >>> test_list = [1,2,3,4,5]
+    >>> get_index(test_list, int)
+    0
     """
     indices = []
     for ind in range(len(list)):
@@ -118,9 +121,11 @@ def get_index(list, cl, last = False):
             indices.append(ind)
     return indices[-1]
 
+
 def gumball_animation(time, t_start, layers):
     """Animates a gumball travelling down gumball machine track. Each time function
     is called, it alters objects in layers to one clock-tick's worth of animation.
+    This allows the gumball to pass in front of and behind image layers while traveling down the machine.
 
     time: current game time
     t_start: start time of gumball animation. Used to determine which step to animate.
@@ -138,7 +143,10 @@ def gumball_animation(time, t_start, layers):
     slope = 0.2087  #slope of ramp
     width = 127     #width of chute
 
-    #first timestep: rotate dispenser 90 degrees
+    #first timestep: rotate dispenser 90 degrees. By getting the position of where
+    #the knob image layer is in the list of all the image layers, the knob can be
+    #rotated (modified) and replace the unmodified knob image in the list;
+    # the entire list is then returned.
     if t_since == 0:
         disp_ind = get_index(layers, Machine_layer, last = True)
         dispenser = layers[disp_ind]
@@ -149,7 +157,7 @@ def gumball_animation(time, t_start, layers):
 
         gumball.x, gumball.y = 483, 473
 
-    #change gumball layer position at specific time steps
+    #change gumball layer position at specific time steps.
     if t_since == int(width/speed) or t_since == int(3*width/speed):
         layers.pop(gumball_ind)
         layers.insert(gumball_ind + 1, gumball)
@@ -189,7 +197,7 @@ def get_dir():
     return random.choice(xs), random.choice(ys)
 
 def surprise_animation(time, t_start, layers, dirx, diry):
-    """Animates gumball travelling to random spot, adds surprise to layers, and
+    """Animates gumball travelling to random spot, adds the surprise picture to layers, and
     plays scaling animation for surprise. Each time function is called, it alters
     objects in layers to one clock-tick's worth of animation.
 
@@ -219,7 +227,7 @@ def surprise_animation(time, t_start, layers, dirx, diry):
 
     #insert surprise into layers
     if t_since == 20:
-        img_name = random.choice(['cat.png', 'giraffe.png', 'hippo.png', 'turtle.png'])
+        img_name = random.choice(['cat.png', 'giraffe.png', 'hippo.png', 'turtle.png', 'iguana.png', 'pelican.png'])
         surprise = Surprise(img_name, gumball.x, gumball.y)
         surprise.scale(.05)
         layers.append(surprise)
@@ -285,7 +293,6 @@ def main():
     while not done:
 
         mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()
-
         #get input
         for event in pygame.event.get():
 
@@ -341,6 +348,8 @@ def main():
 
 
 if __name__ == '__main__':
+    import doctest
+    doctest.testmod(verbose = False)
     main()
     #exit game if main game loop ends
     pygame.display.quit()
