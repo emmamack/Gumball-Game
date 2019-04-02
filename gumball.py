@@ -192,8 +192,8 @@ def get_dir():
     """Returns random integers which represent an x amount and a y amount to travel
     in one clock cycle. Helper function for surprise_animation
     """
-    xs = list(range(-25, -3)) + list(range(3, 30))
-    ys = list(range(-25, 10))
+    xs = list(range(-25, -5)) + list(range(5, 25))
+    ys = list(range(-35, 5))
     return random.choice(xs), random.choice(ys)
 
 def surprise_animation(time, t_start, layers, dirx, diry):
