@@ -101,13 +101,15 @@ class Surprise():
 
 
 
-def get_index(list, cl, last = False):
+def get_index(list, cl, last = False, all = False):
     """Returns index of first object in a list that is an instance of given class.
+    Can also return list if all is True.
 
     list: list that contains at least one instance of desired class. If there is no instance
     of class, it raises an error.
     cl: name of desired class
     last: if True, returns last index of class instance instead of first
+    all: if True, returns li
     >>> test_list = [1,2,3,4,5]
     >>> get_index(test_list, int)
     0
@@ -116,10 +118,14 @@ def get_index(list, cl, last = False):
     for ind in range(len(list)):
         if isinstance(list[ind], cl):
             #exit loop and return first index if not finding last index
-            if not last:
+            if not last and not all:
                 return ind
             indices.append(ind)
-    return indices[-1]
+
+    if all:
+        return indices
+
+    return indices[-1] #if last
 
 
 def gumball_animation(time, t_start, layers):
@@ -212,21 +218,25 @@ def surprise_animation(time, t_start, layers, dirx, diry):
     """
     t_since = time - t_start
     #find gumball within layers
-    gumball_ind = get_index(layers, Gumball)
-    gumball = layers[gumball_ind]
 
     #change gumabll layer in first time step
     if t_since == 0:
+        gumball_ind = get_index(layers, Gumball)
+        gumball = layers[gumball_ind]
         layers.pop(gumball_ind)
         layers.insert(gumball_ind + 1, gumball)
 
     #move gumball in specified direction
     if 0 < t_since < 20:
+        gumball_ind = get_index(layers, Gumball)
+        gumball = layers[gumball_ind]
         gumball.x += dirx
         gumball.y += diry
 
     #insert surprise into layers
     if t_since == 20:
+        gumball_ind = get_index(layers, Gumball)
+        gumball = layers[gumball_ind]
         img_name = random.choice(['cat.png', 'giraffe.png', 'hippo.png', 'turtle.png',
                                 'iguana.png', 'pelican.png', 'dog.png', 'fish.png',
                                 'penguin.png', 'snake.png'])
@@ -235,6 +245,7 @@ def surprise_animation(time, t_start, layers, dirx, diry):
         layers.append(surprise)
         pygame.mixer.music.load('ding.mp3')
         pygame.mixer.music.play(0)
+        layers.pop(gumball_ind)
 
     #scale surprise a small amount each timestep
     if 20 < t_since < 40:
@@ -316,6 +327,11 @@ def main():
                     dirx, diry = get_dir()
                     s_playing = True
                     t_start = time
+
+            if event.type == KEYDOWN and event.key == K_c:
+                all_indices = get_index(layers, Surprise, all = True)
+                for index in sorted(all_indices, reverse = True):
+                    del layers[index]
 
         #reinitialize background
         screen.fill(BLACK)
